@@ -1,8 +1,8 @@
 // Configuration for worker endpoints
 const CONFIG = {
-    JWT_WORKER_URL: 'https://markdowngpt-worker-jwt.sethkeddy.workers.dev', // Replace with your JWT worker URL
-    AI_WORKER_URL: 'https://markdowngpt-worker-ai.sethkeddy.workers.dev',   // Replace with your AI worker URL
-    ENABLE_JWT: false // Set to false to disable JWT authentication
+    JWT_WORKER_URL: 'https://markdowngpt-worker-jwt.sethkeddy.workers.dev',
+    AI_WORKER_URL: 'https://markdowngpt-worker-ai.sethkeddy.workers.dev',
+    ENABLE_JWT: false
 };
 
 // In-memory storage for the session
@@ -36,6 +36,9 @@ marked.setOptions({
 document.addEventListener('DOMContentLoaded', async function() {
     if (CONFIG.ENABLE_JWT) {
         await initializeSession();
+    } else {
+        // Generate a simple session ID for non-JWT mode
+        editorState.sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
     
     // Set default content
@@ -48,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 // Initialize session with JWT worker
 async function initializeSession() {
     try {
-        // Create session
+        
         const sessionResponse = await fetch(`${CONFIG.JWT_WORKER_URL}/session/create`, {
             method: 'POST',
             headers: {
@@ -56,7 +59,7 @@ async function initializeSession() {
             },
             body: JSON.stringify({
                 userAgent: navigator.userAgent,
-                ipAddress: 'client' // Will be detected by worker
+                ipAddress: 'client'
             })
         });
 
@@ -93,6 +96,8 @@ async function initializeSession() {
         console.error('Session initialization failed:', error);
         // Continue without JWT if initialization fails
         CONFIG.ENABLE_JWT = false;
+        // Fallback to simple session ID
+        editorState.sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 }
 
@@ -189,11 +194,18 @@ async function autoFormat() {
         return;
     }
 
+    // Get the button that triggered this (if called from button click)
+    const button = event && event.target ? event.target : document.querySelector('button[onclick="autoFormat()"]');
+
     try {
         // Show loading state
-        const originalButtonText = event.target.textContent;
-        event.target.textContent = '🔄 Processing...';
-        event.target.disabled = true;
+        if (button) {
+            const originalButtonText = button.textContent;
+            button.textContent = '🔄 Processing...';
+            button.disabled = true;
+            // Store original text for restoration
+            button.dataset.originalText = originalButtonText;
+        }
 
         // Ensure we have a valid token
         const tokenValid = await ensureValidToken();
@@ -211,20 +223,27 @@ async function autoFormat() {
             detectedFormat = 'chatgpt-prompt';
         }
 
+        // Prepare payload that matches worker expectations
+        const payload = {
+            text: content,
+            prompt: 'Format this text for better readability and structure',
+            format: detectedFormat,
+            sessionId: editorState.sessionId || 'anonymous'
+        };
+
+        // Only add token if JWT is enabled and we have one
+        if (CONFIG.ENABLE_JWT && editorState.token) {
+            payload.token = editorState.token;
+        }
+
         // Call AI worker
         const response = await fetch(`${CONFIG.AI_WORKER_URL}/process`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                ...(CONFIG.ENABLE_JWT && editorState.token ? { 'Authorization': `Bearer ${editorState.token}` } : {})
+                'Content-Type': 'application/json'
+                // Note: Authorization header removed as worker expects token in body
             },
-            body: JSON.stringify({
-                text: content,
-                prompt: 'Format this text for better readability and structure',
-                format: detectedFormat,
-                sessionId: editorState.sessionId || 'anonymous',
-                token: editorState.token
-            })
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
@@ -259,10 +278,10 @@ async function autoFormat() {
         }
     } finally {
         // Restore button state
-        const button = document.querySelector('button[onclick="autoFormat()"]');
         if (button) {
-            button.textContent = originalButtonText || '🪄 Auto Format';
+            button.textContent = button.dataset.originalText || '🪄 Auto Format';
             button.disabled = false;
+            delete button.dataset.originalText;
         }
     }
 }
@@ -315,19 +334,26 @@ async function processWithAI(format, customPrompt = null) {
 
         const prompt = customPrompt || prompts[format] || 'Improve the formatting and structure of this text.';
 
+        // Prepare payload that matches worker expectations
+        const payload = {
+            text: content,
+            prompt: prompt,
+            format: format,
+            sessionId: editorState.sessionId || 'anonymous'
+        };
+
+        // Only add token if JWT is enabled and we have one
+        if (CONFIG.ENABLE_JWT && editorState.token) {
+            payload.token = editorState.token;
+        }
+
         const response = await fetch(`${CONFIG.AI_WORKER_URL}/process`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                ...(CONFIG.ENABLE_JWT && editorState.token ? { 'Authorization': `Bearer ${editorState.token}` } : {})
+                'Content-Type': 'application/json'
+                // Note: Authorization header removed as worker expects token in body
             },
-            body: JSON.stringify({
-                text: content,
-                prompt: prompt,
-                format: format,
-                sessionId: editorState.sessionId || 'anonymous',
-                token: editorState.token
-            })
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
@@ -738,36 +764,6 @@ This editor is specifically optimized for **dev.to** and **ChatGPT** formatting 
 - **Export Options**: Save as Markdown, HTML, or copy to clipboard
 - **Syntax Highlighting**: Code blocks with proper highlighting
 - **Secure Sessions**: JWT-based authentication and rate limiting
-
-## 🚀 Quick Start
-
-1. Start typing in the editor
-2. Use toolbar buttons for quick formatting
-3. Try the **Auto Format** button to see AI-powered intelligent formatting
-4. Use **dev.to Style** for blog posts
-5. Use **ChatGPT Style** for clear prompts
-
-## 💡 Pro Tips
-
-- The AI detects code and automatically wraps it in code blocks
-- Tutorial content gets automatically numbered steps
-- Articles get smart heading detection
-- All formatting works great with dev.to and ChatGPT!
-- Rate limiting ensures fair usage for all users
-
-\`\`\`javascript
-// Code example with syntax highlighting
-const markdownSurgeon = {
-    power: 'maximum',
-    features: ['ai-format', 'live-preview', 'export', 'jwt-auth'],
-    optimizedFor: ['dev.to', 'ChatGPT'],
-    aiPowered: true
-};
-
-console.log('Ready to create amazing content with AI! 🎉');
-\`\`\`
-
-> Try the different formatting templates below to see the AI magic! ✨
 
 **Note**: AI processing is limited to 1000 characters. For longer content, templates will be used instead.`;
 }
