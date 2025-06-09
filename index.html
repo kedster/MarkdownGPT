@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text Processor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>AI Text Processor</h1>
+            <p>Transform your raw text with AI-powered formatting and processing</p>
+        </div>
+
+        <div class="toolbar">
+            <button class="btn" onclick="insertFormat('**', '**', 'Bold text')">Bold</button>
+            <button class="btn" onclick="insertFormat('*', '*', 'Italic text')">Italic</button>
+            <button class="btn" onclick="insertFormat('`', '`', 'code')">Code</button>
+            <button class="btn" onclick="insertFormat('```\n', '\n```', 'code block')">Code Block</button>
+            <button class="btn" onclick="insertFormat('> ', '', 'Quote text')">Quote</button>
+            <button class="btn" onclick="insertFormat('- ', '', 'List item')">List</button>
+            <button class="btn" onclick="insertFormat('## ', '', 'Heading')">H2</button>
+            <button class="btn" onclick="insertFormat('### ', '', 'Heading')">H3</button>
+            <button class="btn secondary" onclick="clearEditor()">🗑️ Clear</button>
+            <button class="btn secondary" onclick="copyToClipboard()">📋 Copy</button>
+
+            <div class="stats" id="stats">
+                Characters: 0 / 1000
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="editor-container">
+            <div class="editor-panel">
+                <div class="panel-header">
+                    📝 Raw Text Input
+                    <span class="char-counter" id="charCounter">0/1000</span>
+                </div>
+                <textarea class="editor" id="editor" placeholder="Enter your raw text here (max 1000 characters)...
+
+Example:
+Write a professional email about project delays
+Create a summary of machine learning concepts
+Format this text as a blog post introduction"></textarea>
+            </div>
+
+            <div class="preview-panel">
+                <div class="panel-header">👁️ AI Processed Output</div>
+                <div class="preview" id="preview">
+                    <p style="color: #666; font-style: italic;">Your AI-processed text will appear here...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="format-panel">
+            <h3 style="margin-bottom: 15px; color: #333;">🤖 AI Processing Options</h3>
+            <div class="format-options">
+                <div class="format-btn" data-format="professional-email" onclick="processWithAI(this, 'professional-email')">
+                    <strong>📧 Professional Email</strong><br>
+                    <small>Transform to business email format</small>
+                </div>
+                <div class="format-btn" data-format="blog-post" onclick="processWithAI(this, 'blog-post')">
+                    <strong>📝 Blog Post</strong><br>
+                    <small>Structure as engaging blog content</small>
+                </div>
+                <div class="format-btn" data-format="technical-summary" onclick="processWithAI(this, 'technical-summary')">
+                    <strong>📊 Technical Summary</strong><br>
+                    <small>Create concise technical overview</small>
+                </div>
+                <div class="format-btn" data-format="creative-writing" onclick="processWithAI(this, 'creative-writing')">
+                    <strong>✨ Creative Writing</strong><br>
+                    <small>Enhance with creative flair</small>
+                </div>
+                <div class="format-btn" data-format="social-media" onclick="processWithAI(this, 'social-media')">
+                    <strong>📱 Social Media</strong><br>
+                    <small>Optimize for social platforms</small>
+                </div>
+                <div class="format-btn" data-format="documentation" onclick="processWithAI(this, 'documentation')">
+                    <strong>📚 Documentation</strong><br>
+                    <small>Format as clear documentation</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
