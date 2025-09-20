@@ -177,6 +177,38 @@ function setupEventListeners() {
             e.preventDefault();
         });
 
+        // Settings event listeners
+        const enableIconsCheckbox = document.getElementById('enableIcons');
+        const enablePrefilledCheckbox = document.getElementById('enablePrefilled');
+
+        if (enableIconsCheckbox) {
+            enableIconsCheckbox.addEventListener('change', function() {
+                showNotification(`Icons and emojis ${this.checked ? 'enabled' : 'disabled'}`, 'info');
+            });
+        }
+
+        if (enablePrefilledCheckbox) {
+            enablePrefilledCheckbox.addEventListener('change', function() {
+                if (!this.checked) {
+                    // Clear prefilled content if disabled
+                    const currentContent = editor.value.trim();
+                    const defaultContent = getDefaultContent().trim();
+                    if (currentContent === defaultContent || currentContent.includes('Welcome to MarkdownGPT')) {
+                        editor.value = '';
+                        editor.dispatchEvent(new Event('input'));
+                    }
+                } else {
+                    // Restore default content if enabled and editor is empty
+                    if (!editor.value.trim()) {
+                        const defaultContent = getDefaultContent();
+                        editor.value = defaultContent;
+                        editor.dispatchEvent(new Event('input'));
+                    }
+                }
+                showNotification(`Prefilled text ${this.checked ? 'enabled' : 'disabled'}`, 'info');
+            });
+        }
+
     } catch (error) {
         logError('Event listener setup failed', error);
     }
@@ -566,7 +598,12 @@ async function processWithAI(element, format, customPrompt = null) {
             'tutorial': 'Format this as a step-by-step tutorial with numbered sections and clear instructions.',
             'chatgpt-prompt': 'Reformat this as a clear, structured prompt for ChatGPT with specific requirements and context.',
             'readme': 'Format this as a professional README document with sections for installation, usage, and examples.',
-            'Med-Article': 'Transform this into a well-structured Medium-style article with engaging headings, proper formatting, and clear sections.'
+            'Med-Article': 'Transform this into a well-structured Medium-style article with engaging headings, proper formatting, and clear sections.',
+            // New platform-specific formats
+            'peerlist-article': 'Transform this into a professional Peerlist article that showcases expertise and builds credibility. Focus on insights, career lessons, and actionable advice. Use engaging headlines and professional tone suitable for networking.',
+            'twitter-post': 'Transform this into an engaging Twitter/X thread. Break into concise, punchy tweets (max 280 chars each). Use hooks, numbered points, and encourage engagement. Include relevant hashtags and maintain conversational tone.',
+            'linkedin-post': 'Transform this into a professional LinkedIn post that drives engagement. Use storytelling elements, professional insights, and calls-to-action. Include relevant hashtags and maintain thought leadership tone.',
+            'dailydev-article': 'Transform this into a Daily.dev community article. Focus on practical development insights, code examples, and developer-focused content. Use clear sections, code blocks, and actionable takeaways for the developer community.'
         };
 
         const prompt = customPrompt || prompts[format] || 'Improve the formatting and structure of this text.';
@@ -621,7 +658,20 @@ async function processWithAI(element, format, customPrompt = null) {
 
                 if (result.success && result.processedText) {
                     const processingTime = Date.now() - startTime;
-                    editor.value = result.processedText;
+
+                    // Get current settings
+                    const enableIcons = document.getElementById('enableIcons')?.checked ?? true;
+                    const enablePrefilled = document.getElementById('enablePrefilled')?.checked ?? true;
+
+                    const settings = {
+                        enableIcons,
+                        enablePrefilled
+                    };
+
+                    // Apply content enrichment based on platform and settings
+                    const enrichedText = enrichContent(result.processedText, format, settings);
+
+                    editor.value = enrichedText;
                     editor.dispatchEvent(new Event('input'));
 
                     showNotification(`✨ ${format} formatting completed! (${processingTime}ms)`, 'success');
@@ -965,7 +1015,148 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License.`
+This project is licensed under the MIT License.`,
+
+        // New platform templates
+        'peerlist-article': `# Professional Insight: [Your Topic]
+
+## The Challenge
+
+Describe the professional challenge or situation you encountered...
+
+## Key Insights
+
+### Insight 1
+Your first key learning or insight...
+
+### Insight 2
+Another important realization...
+
+### Insight 3
+A third valuable takeaway...
+
+## Practical Application
+
+How can others apply these insights in their own work?
+
+- Actionable tip 1
+- Actionable tip 2
+- Actionable tip 3
+
+## Key Takeaway
+
+**The main lesson:** Summarize the core message that advances your career or professional growth.
+
+---
+
+What's your experience with this? Share your thoughts below!`,
+
+        'twitter-post': `🧵 Thread: [Your Topic]
+
+1/7 Hook: Start with an attention-grabbing statement or question...
+
+2/7 Problem: Identify the key issue or challenge...
+
+3/7 Solution: Present your main insight or approach...
+
+4/7 Example: Give a concrete example or case study...
+
+5/7 Benefits: Highlight the positive outcomes...
+
+6/7 Action: Tell people what they should do next...
+
+7/7 Conclusion: Wrap up with a key takeaway and encourage engagement.
+
+What do you think? Drop a reply with your experience! 🚀
+
+#YourHashtag #Relevant #Tags`,
+
+        'linkedin-post': `🚀 [Attention-grabbing headline about your topic]
+
+I recently discovered something fascinating about [topic]...
+
+Here's what happened:
+→ Context about the situation
+→ The challenge you faced
+→ What you learned
+
+The key insight? 
+[Your main takeaway or lesson learned]
+
+This changed my perspective because:
+• Point 1 about impact
+• Point 2 about application
+• Point 3 about results
+
+💡 Key takeaway: [One sentence summary]
+
+---
+
+What's your experience with this? I'd love to hear your thoughts in the comments!
+
+♻️ Repost if you found this valuable
+👥 Follow me for more insights on [your area of expertise]
+
+#Leadership #Professional #YourIndustry #Networking`,
+
+        'dailydev-article': `# [Your Development Topic] 🚀
+
+*A practical guide for developers*
+
+## TL;DR
+- Quick summary point 1
+- Quick summary point 2  
+- Quick summary point 3
+
+## The Problem
+
+Describe the development challenge you're addressing...
+
+## The Solution
+
+\`\`\`javascript
+// Your code example here
+const solution = {
+    approach: 'clean and readable',
+    benefits: ['performance', 'maintainability', 'scalability']
+};
+\`\`\`
+
+### Step-by-step implementation:
+
+1. **First step**: Explain what to do...
+2. **Second step**: Next action...
+3. **Third step**: Final implementation...
+
+## Code Example
+
+\`\`\`javascript
+// Complete working example
+function practicalExample() {
+    // Your implementation
+    return 'working code';
+}
+\`\`\`
+
+## Best Practices
+
+- ✅ Do this for better results
+- ✅ Remember this important point
+- ❌ Avoid this common mistake
+
+## Conclusion
+
+Key takeaways:
+- Main learning point 1
+- Main learning point 2
+- Main learning point 3
+
+Happy coding! 🚀
+
+What's your experience with this approach? Let me know in the comments!
+
+---
+*Follow for more dev tips and tricks*`
     };
 
     if (templates[format]) {
@@ -1110,6 +1301,158 @@ function clearEditor() {
     }
 }
 
+// Settings functionality for formatting options
+function clearPrefilled() {
+    try {
+        if (!editor) {
+            throw new Error('Editor element not found');
+        }
+
+        // Check if content looks like default/prefilled content
+        const currentContent = editor.value.trim();
+        const defaultContent = getDefaultContent().trim();
+
+        if (currentContent === defaultContent || currentContent.includes('Welcome to MarkdownGPT')) {
+            editor.value = '';
+            editor.dispatchEvent(new Event('input'));
+            showNotification('📝 Prefilled text cleared', 'info');
+        } else {
+            // Ask for confirmation if there's user content
+            if (confirm('This will clear all content. Are you sure?')) {
+                editor.value = '';
+                editor.dispatchEvent(new Event('input'));
+                showNotification('📝 Content cleared', 'info');
+            }
+        }
+    } catch (error) {
+        logError('Clear prefilled failed', error);
+        showNotification('❌ Failed to clear prefilled text', 'error');
+    }
+}
+
+// Enhanced content enrichment based on settings and platform
+function enrichContent(content, format, settings = {}) {
+    try {
+        let enriched = content;
+
+        // Apply settings-based modifications
+        if (!settings.enableIcons) {
+            // Remove icons and emojis
+            enriched = enriched.replace(/[\u{1F300}-\u{1F9FF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '');
+            enriched = enriched.replace(/—|–/g, '-'); // Replace em dashes
+        }
+
+        // Platform-specific enrichment patterns
+        switch (format) {
+        case 'twitter-post':
+            enriched = enrichTwitterContent(enriched, settings);
+            break;
+        case 'linkedin-post':
+            enriched = enrichLinkedInContent(enriched, settings);
+            break;
+        case 'peerlist-article':
+            enriched = enrichPeerlistContent(enriched, settings);
+            break;
+        case 'dailydev-article':
+            enriched = enrichDailyDevContent(enriched, settings);
+            break;
+        default:
+            enriched = enrichGenericContent(enriched, settings);
+        }
+
+        return enriched;
+    } catch (error) {
+        logError('Content enrichment failed', error);
+        return content; // Return original content if enrichment fails
+    }
+}
+
+// Platform-specific enrichment functions
+function enrichTwitterContent(content, settings) {
+    // Twitter-specific optimizations
+    const lines = content.split('\n').filter(line => line.trim());
+    const tweets = [];
+    let currentTweet = '';
+
+    for (const line of lines) {
+        if ((currentTweet + '\n' + line).length <= 280) {
+            currentTweet += (currentTweet ? '\n' : '') + line;
+        } else {
+            if (currentTweet) {
+                tweets.push(currentTweet);
+            }
+            currentTweet = line.length <= 280 ? line : line.substring(0, 277) + '...';
+        }
+    }
+    if (currentTweet) {
+        tweets.push(currentTweet);
+    }
+
+    return tweets.map((tweet, index) =>
+        tweets.length > 1 ? `${index + 1}/${tweets.length}\n\n${tweet}` : tweet
+    ).join('\n\n---\n\n');
+}
+
+function enrichLinkedInContent(content, settings) {
+    // LinkedIn-specific optimizations
+    let enriched = content;
+
+    // Add engagement hooks
+    if (!enriched.includes('What do you think?') && !enriched.includes('Share your thoughts')) {
+        enriched += '\n\nWhat are your thoughts on this? Share your experience in the comments below!';
+    }
+
+    // Ensure professional tone and structure
+    enriched = enriched.replace(/\n{3,}/g, '\n\n'); // Clean up excessive line breaks
+
+    return enriched;
+}
+
+function enrichPeerlistContent(content, settings) {
+    // Peerlist-specific optimizations for professional networking
+    let enriched = content;
+
+    // Ensure professional insights format
+    if (!enriched.includes('Key takeaway') && !enriched.includes('Lesson learned')) {
+        const lines = enriched.split('\n');
+        if (lines.length > 3) {
+            lines.splice(-1, 0, '\n**Key takeaway:** Focus on practical insights that advance your career.');
+        }
+        enriched = lines.join('\n');
+    }
+
+    return enriched;
+}
+
+function enrichDailyDevContent(content, settings) {
+    // Daily.dev-specific optimizations for developer community
+    let enriched = content;
+
+    // Ensure developer-focused structure
+    if (enriched.includes('function') || enriched.includes('const') || enriched.includes('code')) {
+        // Already has code content, ensure proper formatting
+        enriched = enriched.replace(/```\s*\n/g, '```javascript\n');
+    }
+
+    // Add developer community engagement
+    if (!enriched.includes('Happy coding') && !enriched.includes('developer')) {
+        enriched += '\n\nHappy coding! 🚀\n\nWhat\'s your experience with this? Let me know in the comments!';
+    }
+
+    return enriched;
+}
+
+function enrichGenericContent(content, settings) {
+    // Generic content improvements
+    let enriched = content;
+
+    // Improve readability
+    enriched = enriched.replace(/([.!?])\s*([A-Z])/g, '$1 $2'); // Ensure proper spacing
+    enriched = enriched.replace(/\n{3,}/g, '\n\n'); // Clean up excessive line breaks
+
+    return enriched;
+}
+
 // Copy editor content to clipboard
 function copyToClipboard() {
     try {
@@ -1167,6 +1510,13 @@ function fallbackCopyToClipboard(text) {
 }
 
 function getDefaultContent() {
+    // Check if prefilled text is enabled
+    const enablePrefilled = document.getElementById('enablePrefilled')?.checked ?? true;
+
+    if (!enablePrefilled) {
+        return ''; // Return empty string if prefilled text is disabled
+    }
+
     return `# Welcome to MarkdownGPT! 🚀
 
 Transform your raw text with AI-powered formatting and processing for professional documents.
@@ -1193,6 +1543,7 @@ Transform your raw text with AI-powered formatting and processing for profession
 - Use "Tutorial" format for step-by-step guides  
 - "README" format creates professional documentation
 - "ChatGPT Prompt" formats text for AI interactions
+- Try new platform formats: Peerlist, Twitter, LinkedIn, Daily.dev
 
 **Ready to transform your text? Replace this content and click a format button below!**`;
 }

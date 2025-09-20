@@ -57,6 +57,22 @@ Format this text as a blog post introduction"></textarea>
             </div>
         </div>
 
+        <!-- Settings Panel -->
+        <div class="settings-panel">
+            <h3 style="margin-bottom: 15px; color: #333;">⚙️ Formatting Settings</h3>
+            <div class="settings-options">
+                <label class="setting-item">
+                    <input type="checkbox" id="enableIcons" checked>
+                    <span>Include icons and emojis in responses</span>
+                </label>
+                <label class="setting-item">
+                    <input type="checkbox" id="enablePrefilled" checked>
+                    <span>Show prefilled placeholder text</span>
+                </label>
+                <button class="btn secondary" onclick="clearPrefilled()">Clear Prefilled Text</button>
+            </div>
+        </div>
+
         <div class="format-panel">
             <h3 style="margin-bottom: 15px; color: #333;">🤖 AI Processing Options</h3>
             <div class="format-options">
@@ -64,9 +80,38 @@ Format this text as a blog post introduction"></textarea>
                     <strong>📚 Dev.to Article</strong><br>
                     <small>Headers, code blocks, lists</small>
                 </div>
-                <div class="format-btn" data-format="technical-summary" onclick="processWithAI(this, 'Med-Article')">
+                <div class="format-btn" data-format="Med-Article" onclick="processWithAI(this, 'Med-Article')">
                     <strong>📊 Medium.com Article</strong><br>
-                    <small>Headers, code blocks, lists</small>
+                    <small>Engaging headers, proper formatting</small>
+                </div>
+                <div class="format-btn" data-format="tutorial" onclick="processWithAI(this, 'tutorial')">
+                    <strong>📖 Tutorial</strong><br>
+                    <small>Step-by-step instructions</small>
+                </div>
+                <div class="format-btn" data-format="readme" onclick="processWithAI(this, 'readme')">
+                    <strong>📄 README</strong><br>
+                    <small>Installation, usage, examples</small>
+                </div>
+                <div class="format-btn" data-format="chatgpt-prompt" onclick="processWithAI(this, 'chatgpt-prompt')">
+                    <strong>🤖 ChatGPT Prompt</strong><br>
+                    <small>Structured AI instructions</small>
+                </div>
+                <!-- New Platform Options -->
+                <div class="format-btn" data-format="peerlist-article" onclick="processWithAI(this, 'peerlist-article')">
+                    <strong>👥 Peerlist Article</strong><br>
+                    <small>Professional networking content</small>
+                </div>
+                <div class="format-btn" data-format="twitter-post" onclick="processWithAI(this, 'twitter-post')">
+                    <strong>🐦 X (Twitter) Post</strong><br>
+                    <small>Concise, engaging threads</small>
+                </div>
+                <div class="format-btn" data-format="linkedin-post" onclick="processWithAI(this, 'linkedin-post')">
+                    <strong>💼 LinkedIn Post</strong><br>
+                    <small>Professional insights, networking</small>
+                </div>
+                <div class="format-btn" data-format="dailydev-article" onclick="processWithAI(this, 'dailydev-article')">
+                    <strong>🌐 Daily.dev Article</strong><br>
+                    <small>Developer community content</small>
                 </div>
                 </div>
             </div>
