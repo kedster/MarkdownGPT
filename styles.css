@@ -225,6 +225,49 @@
             display: none;
         }
 
+        /* Settings Panel Styles */
+        .settings-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .settings-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .setting-item:hover {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .setting-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .setting-item span {
+            font-size: 14px;
+            color: #444;
+        }
+
         @media (max-width: 768px) {
             .editor-container {
                 grid-template-columns: 1fr;
@@ -241,5 +284,14 @@
             
             .stats {
                 margin: 10px 0 0 0;
+            }
+
+            .settings-options {
+                gap: 10px;
+            }
+
+            .setting-item {
+                padding: 8px;
+                font-size: 13px;
             }
         }

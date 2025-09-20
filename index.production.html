@@ -110,6 +110,22 @@ Format this text as a blog post introduction"
             </div>
         </div>
 
+        <!-- Settings Panel -->
+        <div class="settings-panel">
+            <h3 style="margin-bottom: 15px; color: #333;">⚙️ Formatting Settings</h3>
+            <div class="settings-options">
+                <label class="setting-item">
+                    <input type="checkbox" id="enableIcons" checked>
+                    <span>Include icons and emojis in responses</span>
+                </label>
+                <label class="setting-item">
+                    <input type="checkbox" id="enablePrefilled" checked>
+                    <span>Show prefilled placeholder text</span>
+                </label>
+                <button class="btn secondary" onclick="clearPrefilled()" title="Remove placeholder text from editor">Clear Prefilled Text</button>
+            </div>
+        </div>
+
         <div class="format-panel">
             <h3 style="margin-bottom: 15px; color: #333;">🤖 AI Processing Options</h3>
             <div class="format-options">
@@ -132,6 +148,23 @@ Format this text as a blog post introduction"
                 <div class="format-btn" data-format="chatgpt-prompt" onclick="processWithAI(this, 'chatgpt-prompt')" title="Transform into a ChatGPT prompt">
                     <strong>🤖 ChatGPT Prompt</strong><br>
                     <small>Structured AI instructions</small>
+                </div>
+                <!-- New Platform Options -->
+                <div class="format-btn" data-format="peerlist-article" onclick="processWithAI(this, 'peerlist-article')" title="Transform into professional Peerlist content">
+                    <strong>👥 Peerlist Article</strong><br>
+                    <small>Professional networking content</small>
+                </div>
+                <div class="format-btn" data-format="twitter-post" onclick="processWithAI(this, 'twitter-post')" title="Transform into engaging X (Twitter) thread">
+                    <strong>🐦 X (Twitter) Post</strong><br>
+                    <small>Concise, engaging threads</small>
+                </div>
+                <div class="format-btn" data-format="linkedin-post" onclick="processWithAI(this, 'linkedin-post')" title="Transform into professional LinkedIn post">
+                    <strong>💼 LinkedIn Post</strong><br>
+                    <small>Professional insights, networking</small>
+                </div>
+                <div class="format-btn" data-format="dailydev-article" onclick="processWithAI(this, 'dailydev-article')" title="Transform into Daily.dev community content">
+                    <strong>🌐 Daily.dev Article</strong><br>
+                    <small>Developer community content</small>
                 </div>
             </div>
         </div>
