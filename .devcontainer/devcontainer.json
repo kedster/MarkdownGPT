@@ -1,0 +1,66 @@
+{
+  "name": "MarkdownGPT Development",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-json",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.live-server",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "ms-vscode.vscode-typescript-next",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-playwright.playwright",
+        "github.copilot",
+        "ms-vscode.test-adapter-converter"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "liveServer.settings.port": 8000,
+        "liveServer.settings.CustomBrowser": "chrome",
+        "files.associations": {
+          "*.html": "html",
+          "*.css": "css",
+          "*.js": "javascript"
+        }
+      }
+    }
+  },
+
+  "forwardPorts": [8000, 3000, 5000],
+  "portsAttributes": {
+    "8000": {
+      "label": "MarkdownGPT App",
+      "onAutoForward": "notify"
+    },
+    "3000": {
+      "label": "Development Server",
+      "onAutoForward": "silent"
+    }
+  },
+
+  "postCreateCommand": "npm install && echo 'MarkdownGPT development environment ready!'",
+  
+  "postStartCommand": "echo 'Starting MarkdownGPT...' && python3 -m http.server 8000 > /dev/null 2>&1 &",
+
+  "remoteUser": "vscode",
+
+  "mounts": [
+    "source=markdowngpt-node-modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
+  ]
+}

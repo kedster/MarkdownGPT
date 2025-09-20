@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarkdownGPT - AI Text Processor</title>
+    <meta name="description" content="Transform your raw text with AI-powered formatting and processing for professional documents">
+    <meta name="keywords" content="markdown, ai, text processing, gpt, formatting, web app">
+    <meta name="author" content="MarkdownGPT Team">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://kedster.github.io/MarkdownGPT/">
+    <meta property="og:title" content="MarkdownGPT - AI Text Processor">
+    <meta property="og:description" content="Transform your raw text with AI-powered formatting and processing for professional documents">
+    <meta property="og:image" content="https://kedster.github.io/MarkdownGPT/assets/og-image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://kedster.github.io/MarkdownGPT/">
+    <meta property="twitter:title" content="MarkdownGPT - AI Text Processor">
+    <meta property="twitter:description" content="Transform your raw text with AI-powered formatting and processing for professional documents">
+    <meta property="twitter:image" content="https://kedster.github.io/MarkdownGPT/assets/og-image.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+    
+    <!-- External Dependencies with fallbacks -->
+    <script>
+        // Load marked.js with fallback
+        const markedScript = document.createElement('script');
+        markedScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js';
+        markedScript.onerror = function() {
+            console.warn('CDN marked.js failed to load - using fallback');
+            window.markedLoadFailed = true;
+        };
+        document.head.appendChild(markedScript);
+
+        // Load highlight.js with fallback
+        const hljsScript = document.createElement('script');
+        hljsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js';
+        hljsScript.onerror = function() {
+            console.warn('CDN highlight.js failed to load - using fallback');
+            window.hljsLoadFailed = true;
+        };
+        document.head.appendChild(hljsScript);
+    </script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" onerror="console.warn('CDN styles failed to load')">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>🚀 MarkdownGPT</h1>
+            <p>Transform your raw text with AI-powered formatting and processing</p>
+            <div class="header-badges">
+                <a href="https://github.com/kedster/MarkdownGPT" target="_blank" rel="noopener" class="badge">
+                    ⭐ Star on GitHub
+                </a>
+                <a href="https://github.dev/kedster/MarkdownGPT" target="_blank" rel="noopener" class="badge">
+                    💻 Open in Codespaces
+                </a>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <button class="btn" onclick="insertFormat('**', '**', 'Bold text')" title="Bold (Ctrl+B)">Bold</button>
+            <button class="btn" onclick="insertFormat('*', '*', 'Italic text')" title="Italic (Ctrl+I)">Italic</button>
+            <button class="btn" onclick="insertFormat('`', '`', 'code')" title="Inline Code">Code</button>
+            <button class="btn" onclick="insertFormat('```\n', '\n```', 'code block')" title="Code Block">Code Block</button>
+            <button class="btn" onclick="insertFormat('> ', '', 'Quote text')" title="Blockquote">Quote</button>
+            <button class="btn" onclick="insertFormat('- ', '', 'List item')" title="Bullet List">List</button>
+            <button class="btn" onclick="insertFormat('## ', '', 'Heading')" title="Heading 2">H2</button>
+            <button class="btn" onclick="insertFormat('### ', '', 'Heading')" title="Heading 3">H3</button>
+            <button class="btn secondary" onclick="clearEditor()" title="Clear all content">🗑️ Clear</button>
+            <button class="btn secondary" onclick="copyToClipboard()" title="Copy to clipboard">📋 Copy</button>
+
+            <div class="stats" id="stats">
+                Characters: 0 / 1000
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="editor-container">
+            <div class="editor-panel">
+                <div class="panel-header">
+                    📝 Raw Text Input
+                    <span class="char-counter" id="charCounter">0/1000</span>
+                </div>
+                <textarea 
+                    class="editor" 
+                    id="editor" 
+                    placeholder="Enter your raw text here (max 1000 characters)...
+
+Example:
+Write a professional email about project delays
+Create a summary of machine learning concepts
+Format this text as a blog post introduction"
+                    maxlength="2000"
+                    spellcheck="true"></textarea>
+            </div>
+
+            <div class="preview-panel">
+                <div class="panel-header">👁️ AI Processed Output</div>
+                <div class="preview" id="preview">
+                    <p style="color: #666; font-style: italic;">Your AI-processed text will appear here...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="format-panel">
+            <h3 style="margin-bottom: 15px; color: #333;">🤖 AI Processing Options</h3>
+            <div class="format-options">
+                <div class="format-btn" data-format="dev-article" onclick="processWithAI(this, 'dev-article')" title="Transform into a development article">
+                    <strong>📚 Dev.to Article</strong><br>
+                    <small>Headers, code blocks, lists</small>
+                </div>
+                <div class="format-btn" data-format="Med-Article" onclick="processWithAI(this, 'Med-Article')" title="Transform into a Medium-style article">
+                    <strong>📊 Medium.com Article</strong><br>
+                    <small>Engaging headers, proper formatting</small>
+                </div>
+                <div class="format-btn" data-format="tutorial" onclick="processWithAI(this, 'tutorial')" title="Transform into a step-by-step tutorial">
+                    <strong>📖 Tutorial</strong><br>
+                    <small>Step-by-step instructions</small>
+                </div>
+                <div class="format-btn" data-format="readme" onclick="processWithAI(this, 'readme')" title="Transform into a README document">
+                    <strong>📄 README</strong><br>
+                    <small>Installation, usage, examples</small>
+                </div>
+                <div class="format-btn" data-format="chatgpt-prompt" onclick="processWithAI(this, 'chatgpt-prompt')" title="Transform into a ChatGPT prompt">
+                    <strong>🤖 ChatGPT Prompt</strong><br>
+                    <small>Structured AI instructions</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                Built with ❤️ for developers | 
+                <a href="https://github.com/kedster/MarkdownGPT" target="_blank" rel="noopener">GitHub</a> | 
+                <a href="https://github.com/kedster/MarkdownGPT/issues" target="_blank" rel="noopener">Report Issue</a> |
+                <a href="docs/GITHUB_MODELS.md" target="_blank">GitHub Models Integration</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Service Worker for offline functionality -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {
+                console.log('Service worker registration failed');
+            });
+        }
+    </script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
