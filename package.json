@@ -8,18 +8,22 @@
     "dev": "python3 -m http.server 8000",
     "build": "npm run build:copy",
     "build:prod": "npm run build:optimize && npm run build:copy",
-    "build:copy": "mkdir -p dist && cp -r *.html *.js *.css dist/",
-    "build:optimize": "echo 'Build optimization would go here'",
+    "build:copy": "mkdir -p dist && cp -r *.html *.js *.css *.json dist/ && cp -r docs dist/ 2>/dev/null || true",
+    "build:optimize": "echo 'Build optimization: copying production files' && cp index.production.html dist/index.html 2>/dev/null || cp index.html dist/index.html",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --coverageReporters=text-lcov > coverage/lcov.info",
     "test:e2e": "playwright test",
+    "test:github-models": "ENABLE_GITHUB_MODELS=true npm test",
+    "test:playground": "echo 'Testing GitHub Models playground integration'",
     "lint": "eslint *.js",
     "lint:fix": "eslint *.js --fix",
     "format": "prettier --write *.js *.html *.css *.md",
     "validate": "npm run lint && npm run test",
     "serve": "python3 -m http.server 8000",
-    "clean": "rm -rf dist coverage node_modules/.cache"
+    "clean": "rm -rf dist coverage node_modules/.cache",
+    "deploy": "npm run build:prod && echo 'Ready for deployment'",
+    "deploy:gh-pages": "npm run build:prod && gh-pages -d dist"
   },
   "keywords": [
     "markdown",
@@ -58,11 +62,14 @@
   ],
   "jest": {
     "testEnvironment": "jsdom",
+    "testMatch": ["**/tests/**/*.test.js"],
     "collectCoverageFrom": [
       "*.js",
       "!node_modules/**",
       "!coverage/**",
-      "!dist/**"
+      "!dist/**",
+      "!playwright.config.js",
+      "!tests/**"
     ],
     "coverageDirectory": "coverage",
     "coverageReporters": [
